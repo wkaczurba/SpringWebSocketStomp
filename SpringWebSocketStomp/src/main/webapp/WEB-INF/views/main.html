@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="www.thymeleaf.org">
+<head>
+  <script th:src="@{/webjars/sockjs-client/0.3.4/sockjs.min.js}"></script>
+  <script th:src="@{/webjars/stomp-websocket/2.3.0/stomp.min.js}"></script>
+  <script th:src="@{/webjars/jquery/2.0.3/jquery.min.js}"></script>
+
+<meta charset="ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body>
+<H1>main.html</H1>
+
+  <button id="stop">STOP</button>
+
+  <script th:inline="javascript">
+    var sock = new SockJS([[@{/marcopolo}]]);
+    var stomp = Stomp.over(sock);
+    
+    stomp.connect('guest','guest', function(name) {
+      console.log('STOMP connected');
+      stomp.subscribe("/topic/marco", handlePolo);
+      sayMarco();
+    });
+    
+    function handlePolo(message) {
+      console.log('Received: ', message);
+      $('#output').append("<b>Received:</b> " + JSON.parse(message.body).msg + "</b><br/>");
+      
+      if (JSON.parse(message.body).msg === 'POLO') {
+    	  setTimeout(function(){sayMarco()}, 2000);
+      }
+    }
+    
+    function sayMarco() {
+      stomp.send("/app/marco", {}, JSON.stringify({ 'msg': 'MARCO' }));
+      $('#output').append("<b>Send: MARCO!</b><br/>");
+    }
+    
+    $("#stop").click(function() {sock.close()});
+  </script>
+  
+  <div id="output"></div>
+
+</body>
+</html>

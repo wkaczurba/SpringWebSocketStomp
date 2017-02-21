@@ -2,6 +2,7 @@ package com;
 
 import javax.servlet.ServletRegistration.Dynamic;
 
+import com.web.SecurityConfig;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 import com.web.WebConfig;
 import com.web.WebSocketStompConfig;
@@ -10,8 +11,7 @@ public class WebInitializer extends AbstractAnnotationConfigDispatcherServletIni
 
 	@Override
 	protected Class<?>[] getRootConfigClasses() {
-		// TODO Auto-generated method stub
-		return null;
+		return new Class<?>[] { SecurityConfig.class }; 
 	}
 
 	@Override

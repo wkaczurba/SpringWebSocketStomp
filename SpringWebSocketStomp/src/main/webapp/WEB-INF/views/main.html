@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="www.thymeleaf.org">
+<html xmlns:th="www.thymeleaf.org"
+  xmlns:sec="http://www.springframework.org/security/tags">
 <head>
   <script th:src="@{/webjars/sockjs-client/0.3.4/sockjs.min.js}"></script>
   <script th:src="@{/webjars/stomp-websocket/2.3.0/stomp.min.js}"></script>
@@ -10,37 +11,83 @@
 </head>
 <body>
 <H1>main.html</H1>
+  Hello <span sec:authentication="name" style="font-weight:bold;"></span>
+
+  <form id="myForm">
+    <textarea rows="4" cols="60" name="text"></textarea>
+    <input type="submit"/>
+  </form>
 
   <button id="stop">STOP</button>
 
   <script th:inline="javascript">
-    var sock = new SockJS([[@{/marcopolo}]]);
-    var stomp = Stomp.over(sock);
+      $('#myForm').submit(function(e){
+    	  e.preventDefault();
+    	  var text = $('#myForm').find('textarea[name="text"]').val();
+    	  sayNotification(text);
+      });
+//    var sock = new SockJS([[@{/marcopolo}]]);
+    var sock_notification = new SockJS([[@{/notifications}]]);
     
-    stomp.connect('guest','guest', function(name) {
-      console.log('STOMP connected');
-      stomp.subscribe("/topic/marco", handlePolo);
+//    var stomp_marcopolo = Stomp.over(sock);
+    var stomp_notifications = Stomp.over(sock_notification);
+    
+/*    stomp_marcopolo.connect('guest','guest', function(name) {
+      console.log('STOMP (MarcoPolo) connected');
+      stomp_marcopolo.subscribe("/topic/marco", handlePolo);
       sayMarco();
+    });*/
+    
+    stomp_notifications.connect('guest','guest', function(name) {
+    	console.log('STOMP (chat) connected');
+    	stomp_notifications.subscribe("/topic/notifications", handleNotification);
+    	sayNotification("zzz");
     });
     
+/*
     function handlePolo(message) {
-      console.log('Received: ', message);
+      console.log('Received MarcoPolo thing: ', message);
       $('#output').append("<b>Received:</b> " + JSON.parse(message.body).msg + "</b><br/>");
       
       if (JSON.parse(message.body).msg === 'POLO') {
     	  setTimeout(function(){sayMarco()}, 2000);
       }
     }
+*/    
     
-    function sayMarco() {
-      stomp.send("/app/marco", {}, JSON.stringify({ 'msg': 'MARCO' }));
+    function handleNotification(notification) {
+    	console.log('Received Notification: ', notification);
+    	$('#messages').append("<b>Notification:</b>", JSON.parse(notification.body).text + "</b><br/>");
+    }
+    
+/*    function sayMarco() {
+      stomp_marcopolo.send("/app/marco", {}, JSON.stringify({ 'msg': 'MARCO' }));
       $('#output').append("<b>Send: MARCO!</b><br/>");
+    }*/
+    
+    function sayNotification(text) {
+    	console.log('Sending notification:', text);
+    	stomp_notifications.send("/app/notifications", {}, JSON.stringify({ 'text': text }));
+    	$('#messages').append("<b>Send: "+ text + " </b><br/>");
     }
     
     $("#stop").click(function() {sock.close()});
   </script>
   
-  <div id="output"></div>
+  <table style="width:100%">
+  	<thead>
+  	  <tr>
+  	    <th width=50%>Chat</th>
+  	    <th width=50%>Marco-polo-thing</th>
+  	  </tr>
+  	</thead>
+  
+  	<tr>
+      <td><div id="messages"></div></td>
+      <td><div id="output"></div></td>
+    </tr>
+  </table>
+  
 
 </body>
 </html>

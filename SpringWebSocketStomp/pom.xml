@@ -86,6 +86,28 @@
     	<artifactId>spring-security-config</artifactId>
     	<version>4.2.1.RELEASE</version>
     </dependency>
+    <dependency>
+    	<groupId>org.slf4j</groupId>
+    	<artifactId>slf4j-api</artifactId>
+    	<version>1.7.22</version>
+    </dependency>
+
+
+    <dependency>
+    	<groupId>org.slf4j</groupId>
+    	<artifactId>jcl-over-slf4j</artifactId>
+    	<version>1.7.22</version>
+    </dependency>
+    <dependency>
+    	<groupId>org.slf4j</groupId>
+    	<artifactId>slf4j-simple</artifactId>
+    	<version>1.7.22</version>
+    </dependency>
+    <dependency>
+    	<groupId>org.thymeleaf.extras</groupId>
+    	<artifactId>thymeleaf-extras-springsecurity4</artifactId>
+    	<version>3.0.1.RELEASE</version>
+    </dependency>
   </dependencies>
   <build>
     <finalName>SpringWebSocketStomp</finalName>

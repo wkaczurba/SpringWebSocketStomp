@@ -15,10 +15,11 @@
 
   <form id="myForm">
     <textarea rows="4" cols="60" name="text"></textarea>
-    <input type="submit"/>
+    <br>
+    <input type="submit"/> | <button id="stop">Disconnect</button> 
   </form>
 
-  <button id="stop">STOP</button>
+  
 
   <script th:inline="javascript">
       $('#myForm').submit(function(e){
@@ -26,26 +27,19 @@
     	  var text = $('#myForm').find('textarea[name="text"]').val();
     	  sayNotification(text);
       });
-//    var sock = new SockJS([[@{/marcopolo}]]);
-    var sock_notification = new SockJS([[@{/notifications}]]);
+    var sock = new SockJS([[@{/notifications}]]);
+    var stomp = Stomp.over(sock);
     
-//    var stomp_marcopolo = Stomp.over(sock);
-    var stomp_notifications = Stomp.over(sock_notification);
-    
-/*    stomp_marcopolo.connect('guest','guest', function(name) {
-      console.log('STOMP (MarcoPolo) connected');
-      stomp_marcopolo.subscribe("/topic/marco", handlePolo);
-      sayMarco();
-    });*/
-    
-    stomp_notifications.connect('guest','guest', function(name) {
+    stomp.connect('guest','guest', function(name) {
     	console.log('STOMP (chat) connected');
-    	stomp_notifications.subscribe("/topic/userupdates", handleUserUpdates);
-    	stomp_notifications.subscribe("/user/queue/notifications", handleNotification);
-    	sayNotification("zzz");
+    	stomp.subscribe("/topic/userupdates", handleUserUpdates);
+    	stomp.subscribe("/user/queue/notifications", handleNotification);
+    	
+    	// Marco-POLO Thing below:
+    	stomp.subscribe("/topic/marco", handlePolo);
+    	sayMarco();
     });
     
-/*
     function handlePolo(message) {
       console.log('Received MarcoPolo thing: ', message);
       $('#output').append("<b>Received:</b> " + JSON.parse(message.body).msg + "</b><br/>");
@@ -54,27 +48,25 @@
     	  setTimeout(function(){sayMarco()}, 2000);
       }
     }
-*/    
+ 
     function handleUserUpdates(userUpdate) {
 	    console.log('Received update: ', userUpdate);
 	    $('#messages').append("<B>UserUpdate:</b>", JSON.parse(userUpdate.body).message + "</b><br/>");
     }
     
     function handleNotification(notification) {
-
     	console.log('Received Notification: ', notification);
-    	 
     	$('#messages').append("<b>Notification:</b>", JSON.parse(notification.body).text + "</b><br/>");
     }
     
-/*    function sayMarco() {
-      stomp_marcopolo.send("/app/marco", {}, JSON.stringify({ 'msg': 'MARCO' }));
+    function sayMarco() {
+      stomp.send("/app/marco", {}, JSON.stringify({ 'msg': 'MARCO' }));
       $('#output').append("<b>Send: MARCO!</b><br/>");
-    }*/
+    }
     
     function sayNotification(text) {
     	console.log('Sending notification:', text);
-    	stomp_notifications.send("/app/notifications", {}, JSON.stringify({ 'text': text }));
+    	stomp.send("/app/notifications", {}, JSON.stringify({ 'text': text }));
     	$('#messages').append("<b>Send: "+ text + " </b><br/>");
     }
     
@@ -90,11 +82,9 @@
   	</thead>
   
   	<tr>
-      <td><div id="messages"></div></td>
-      <td><div id="output"></div></td>
+      <td valign="top"><div id="messages"></div></td>
+      <td valign="top"><div id="output"></div></td>
     </tr>
   </table>
-  
-
 </body>
 </html>

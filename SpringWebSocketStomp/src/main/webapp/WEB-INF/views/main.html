@@ -40,7 +40,8 @@
     
     stomp_notifications.connect('guest','guest', function(name) {
     	console.log('STOMP (chat) connected');
-    	stomp_notifications.subscribe("/topic/notifications", handleNotification);
+    	stomp_notifications.subscribe("/topic/userupdates", handleUserUpdates);
+    	stomp_notifications.subscribe("/user/queue/notifications", handleNotification);
     	sayNotification("zzz");
     });
     
@@ -54,9 +55,15 @@
       }
     }
 */    
+    function handleUserUpdates(userUpdate) {
+	    console.log('Received update: ', userUpdate);
+	    $('#messages').append("<B>UserUpdate:</b>", JSON.parse(userUpdate.body).message + "</b><br/>");
+    }
     
     function handleNotification(notification) {
+
     	console.log('Received Notification: ', notification);
+    	 
     	$('#messages').append("<b>Notification:</b>", JSON.parse(notification.body).text + "</b><br/>");
     }
     
